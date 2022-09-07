@@ -20,6 +20,9 @@ def preprocess_sentence(sentence):
     # deal with leading/tailing whitespaces, as well as multi-whitespaces
     result = re.sub("\s\s", " ", result.strip())
 
+    # remove anything other than a letter, digit or underscore
+    result = re.sub("\W+", " ", result.strip())
+
     # remove
 
     return result
