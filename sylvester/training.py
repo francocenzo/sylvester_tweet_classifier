@@ -4,6 +4,8 @@ from datetime import datetime
 from sklearn import naive_bayes as nb, model_selection as ms
 from sklearn.feature_extraction.text import CountVectorizer
 
+# from sklearn.ensemble import RandomForestClassifier
+
 from sylvester.analyzer import calculate_metrics
 from sylvester.data import get_data, generate_stopwords, save_training
 
@@ -12,6 +14,7 @@ def get_classifier(train_data, train_labels, save=False, load=False):
     # change here if we want to use another naive bayes algorithm:
     # https: // scikit - learn.org / stable / modules / naive_bayes.html
     classifier = nb.BernoulliNB()
+    # classifier = RandomForestClassifier()
     classifier.fit(train_data, train_labels)
     return classifier
 

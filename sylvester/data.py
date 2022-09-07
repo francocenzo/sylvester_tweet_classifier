@@ -113,4 +113,3 @@ if __name__ == "__main__":
 
     save_training(classifier, vectorizer, label_predicted, label_test, file_name="test.pkl")
 
-
