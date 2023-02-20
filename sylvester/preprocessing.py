@@ -1,6 +1,9 @@
 # -*- coding:utf-8 -*-
 import re
+#import nltk
 
+#from nltk.stem.snowball import GermanStemmer
+#german=GermanStemmer()
 
 def preprocess_sentence(sentence):
     '''
@@ -17,6 +20,7 @@ def preprocess_sentence(sentence):
     result = re.sub("#\w*", "", result)
     # remove RT mentions
     result = re.sub("rt(?=[\W$])(?<=[^\W])", "", result)
+
     # deal with leading/tailing whitespaces, as well as multi-whitespaces
     result = re.sub("\s\s", " ", result.strip())
 
@@ -25,18 +29,14 @@ def preprocess_sentence(sentence):
     # deal with single letters (standing alone)
     result = re.sub("\b\w{0,1}\b", " ", result)
     # remove numbers
-    result = re.sub(" \d+", " ", result)
-    # remove numbers
-   # result = re.sub("^\d+\s|\s\d+\s|\s\d+$", " ", result)
-    # remove numbers
-    #
-    #result = re.sub("^\d+\s|\s\d+$", " ", result)
-    # remove numbers
-    #result = re.sub("^\d+\s|\s\d+\s|\s\d+$", " ", result)
-    # remove numbers
-    #result = re.sub(""?!^10vor10$|\d+", " ", result)
-     #   (?! ^ 10vor10$) (\d+)
+    #result = re.sub(" \d+", " ", result)
+
+    result = re.sub("(?!^10vor10$) (\d+)", " ", result)
+    #   (?! ^ 10vor10$)
+    
     # remove
+
+    #result =
 
     return result
 

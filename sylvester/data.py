@@ -11,7 +11,7 @@ from sylvester.preprocessing import preprocess_sentence
 def get_data(file_path):
 
     # header = 0 -> zero-based index
-    data_file = pd.read_csv(file_path, header=0, sep=';', nrows=100)
+    data_file = pd.read_csv(file_path, header=0, sep=';', nrows=1001)
     # debug info to show that the data is imported:
     print(data_file.shape)
     print(data_file.head())

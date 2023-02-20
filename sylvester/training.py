@@ -13,9 +13,9 @@ from sylvester.data import get_data, generate_stopwords, save_training
 def get_classifier(train_data, train_labels, save=False, load=False):
     # change here if we want to use another naive bayes algorithm:
     # https: // scikit - learn.org / stable / modules / naive_bayes.html
-    #classifier = nb.BernoulliNB()
+    classifier = nb.BernoulliNB()
     # classifier = RandomForestClassifier()
-    classifier = svm.SVC(kernel='linear', random_state=1, C=0.1)
+    #classifier = svm.SVC(kernel='linear', random_state=1, C=10, gamma=1)
     classifier.fit(train_data, train_labels)
     return classifier
 
@@ -46,6 +46,7 @@ def transform_to_matrix(data_test, data_train, stopwords, save_feature=False):
 def train(corpus_path, stopword_path=False, save=False, folder=False, file_name=False, save_feature=False):
     # prepare data
     data, label = get_data(corpus_path)
+
 
     # split between training and test
     data_train, data_test, label_train, label_test = ms.train_test_split(data, label, test_size=0.1)
