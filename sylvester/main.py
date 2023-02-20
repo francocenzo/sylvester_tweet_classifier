@@ -1,10 +1,12 @@
 # -*- coding:utf-8 -*-
 import time
+from datetime import datetime
 
 from sylvester.analyzer import analyze
 from sylvester.data import load_training, find_training_file
 from sylvester.classify import classify_item
 from sylvester.training import train_on_corpus
+from pathlib import Path
 
 
 def train_corpus():
@@ -72,9 +74,21 @@ def analyze_training():
 
 def print_results(results):
     print("Summary:")
+    save_output = input("Save output (Y/n): ")
+    default_output_path = Path(r"C:\Users\vince\Documents\Vincenzo\Diss\Python classifier\Python_code\sylvester_tweet_classifier\output")
+    output_file = default_output_path / f"output_{str(datetime.now()).replace(':', '-')}.csv"
+
     for result in results:
         user_sentence, prediction, probability = result
-        print(f"\n{user_sentence}\n\tPrediction: {prediction}\n\tProbability: {probability}\n")
+        print_string = f"\n{user_sentence}\n\tPrediction: {prediction}\n\tProbability: {probability}\n"
+        csv_string = str(user_sentence).replace("\n", " ")
+        output_string = f'"{csv_string}",{prediction},{probability}\n'
+        print(print_string)
+        if save_output.lower() == "y":
+            with open(output_file, "a+", encoding="utf8") as open_file:
+                open_file.write(output_string)
+
+
 
 
 def classify_user_input():
