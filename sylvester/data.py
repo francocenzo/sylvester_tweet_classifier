@@ -11,7 +11,7 @@ from sylvester.preprocessing import preprocess_sentence
 def get_data(file_path, spacy_model=False, snowball_stemmer=False):
 
     # header = 0 -> zero-based index
-    data_file = pd.read_csv(file_path, header=0, sep=';', nrows=1001)
+    data_file = pd.read_csv(file_path, header=0, sep=';', nrows=500)
     # debug info to show that the data is imported:
     print(data_file.shape)
     print(data_file.head())
@@ -19,14 +19,14 @@ def get_data(file_path, spacy_model=False, snowball_stemmer=False):
     mk = []
     pendant = []
 
-    value_counter = 0
+    value_counter = 1
     # sort into to arrays for each label
     for value in data_file.values:
         mk_sentence = preprocess_sentence(value[0], spacy_model=spacy_model, snowball_stemmer=snowball_stemmer)
         mk.append(mk_sentence)
         pendant_sentence = preprocess_sentence(value[1], spacy_model=spacy_model, snowball_stemmer=snowball_stemmer)
         pendant.append(pendant_sentence)
-        if value_counter % 50:  # modulo is true if / 60 has no rest
+        if value_counter % 1000:  # modulo is true if / 60 has no rest
             print("mk: ", mk_sentence)
             print("pendant: ", pendant_sentence)
         value_counter += 1
@@ -112,4 +112,3 @@ if __name__ == "__main__":
     classifier, vectorizer, label_predicted, label_test = load_training(training_file)
 
     save_training(classifier, vectorizer, label_predicted, label_test, file_name="test.pkl")
-

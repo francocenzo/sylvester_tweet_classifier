@@ -7,7 +7,7 @@ def analyze(classifier, vectorizer):
     # analyze features
     # inverse vocabulary from term -> id, to id -> term
     vocabulary = {value: key for key, value in vectorizer.vocabulary_.items()}
-    num_results = 10
+    num_results = 5
     # map arrays with [id] = frequency to dict id -> frequency and return most frequent
     feature_count_mk = {i: classifier.feature_count_[0][i] for i in range(len(classifier.feature_count_[0]))}
     feature_count_mk = Counter(feature_count_mk)

@@ -177,7 +177,7 @@ def run():
     options = [
         ["Train Corpus", train_corpus],
         ["Analyze Training", analyze_training],
-        ["Classify input", classify_user_input],
+        ["Classify0 input", classify_user_input],
         ["Classify TXT-File", classify_txt]
     ]
 

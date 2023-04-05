@@ -43,17 +43,16 @@ def transform_to_matrix(data_test, data_train, stopwords, save_feature=False):
     return test_matrix, train_matrix, vectorizer
 
 
-def train(corpus_path, stopword_path=False, save=False, folder=False, file_name=False, save_feature=False):
+def train(corpus_path, stopword_path=False, save=False, folder=False, file_name=False, save_feature=False, spacy_model=False, snowball_stemmer=False):
     # prepare data
     data, label = get_data(corpus_path, spacy_model=spacy_model, snowball_stemmer=snowball_stemmer)
 
 
     # split between training and test
-    data_train, data_test, label_train, label_test = ms.train_test_split(data, label, test_size=0.1)
+    data_train, data_test, label_train, label_test = ms.train_test_split(data, label, test_size=0.25)
 
     # load stopwords
     stopwords = generate_stopwords(stopword_path or "../data/stopwords-de.txt")
-
     test_matrix, train_matrix, vectorizer = transform_to_matrix(data_test, data_train, stopwords, save_feature=save_feature)
 
     # train training
