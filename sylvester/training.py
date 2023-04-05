@@ -45,7 +45,7 @@ def transform_to_matrix(data_test, data_train, stopwords, save_feature=False):
 
 def train(corpus_path, stopword_path=False, save=False, folder=False, file_name=False, save_feature=False):
     # prepare data
-    data, label = get_data(corpus_path)
+    data, label = get_data(corpus_path, spacy_model=spacy_model, snowball_stemmer=snowball_stemmer)
 
 
     # split between training and test
@@ -69,8 +69,8 @@ def train(corpus_path, stopword_path=False, save=False, folder=False, file_name=
     return classifier, vectorizer, label_predicted, label_test
 
 
-def train_on_corpus(corpus, save=False, save_feature=False):
-    classifier, vectorizer, label_predicted, label_test = train(corpus, save_feature=save_feature)
+def train_on_corpus(corpus, save=False, save_feature=False, spacy_model=False, snowball_stemmer=False):
+    classifier, vectorizer, label_predicted, label_test = train(corpus, save_feature=save_feature, spacy_model=spacy_model, snowball_stemmer=snowball_stemmer)
     accuracy, precision_mk, recall, f1 = calculate_metrics(label_predicted, label_test)
 
     timestamp, file_name = False, False

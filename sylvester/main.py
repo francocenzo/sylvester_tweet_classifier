@@ -2,11 +2,55 @@
 import time
 from datetime import datetime
 
+import spacy
+from nltk.stem.snowball import SnowballStemmer
+
 from sylvester.analyzer import analyze
 from sylvester.data import load_training, find_training_file
 from sylvester.classify import classify_item
 from sylvester.training import train_on_corpus
 from pathlib import Path
+
+loaded_spacy_model = None
+loaded_snowball_stemmer = None
+# load_model = spacy.load('de', disable=['parser', 'ner'])
+
+
+def ask_snowball():
+    """
+    blueprint
+    """
+    global loaded_snowball_stemmer
+    snowball_stemmer = input("Use Snowball Stemmer? (Y/n)")
+    if snowball_stemmer.lower() != "n":
+        snowball_stemmer = True
+    else:
+        snowball_stemmer = False
+
+    if snowball_stemmer:
+        if not loaded_snowball_stemmer:
+            snowball_stemmer = SnowballStemmer("german")
+            loaded_snowball_stemmer = snowball_stemmer
+        else:
+            snowball_stemmer = loaded_snowball_stemmer
+    return snowball_stemmer
+
+
+def ask_spacy():
+    global loaded_spacy_model
+    spacy_model = input("Use Spacy Lemmatizer? (Y/n)")
+    if spacy_model.lower() != "n":
+        spacy_model = True
+    else:
+        spacy_model = False
+
+    if spacy_model:
+        if not loaded_spacy_model:
+            spacy_model = spacy.load('de_core_news_sm', disable=['parser', 'ner'])
+            loaded_spacy_model = spacy_model
+        else:
+            spacy_model = loaded_spacy_model
+    return spacy_model
 
 
 def train_corpus():
@@ -33,10 +77,13 @@ def train_corpus():
     else:
         save_feature = False
 
+    spacy_model = ask_spacy()
+    snowball_stemmer = ask_snowball()
+
     results = []
     for run in range(runs):
         time.sleep(1)
-        classifier, vectorizer, label_predicted, label_test, accuracy, precision_mk, recall, f1, timestamp, file_name = train_on_corpus(corpus, save=save, save_feature=save_feature)
+        classifier, vectorizer, label_predicted, label_test, accuracy, precision_mk, recall, f1, timestamp, file_name = train_on_corpus(corpus, save=save, save_feature=save_feature, spacy_model=spacy_model, snowball_stemmer=snowball_stemmer)
         results.append({
             "classifier": classifier,
             "vectorizer": vectorizer,
@@ -96,10 +143,12 @@ def classify_user_input():
 
     results = []
     user_input = input("\n Classify a sentence? (Y/n)")
+    spacy_model = ask_spacy()
+    snowball_stemmer = ask_snowball()
 
     while user_input.lower() != "n":
         user_sentence = input("Enter Sentence: ")
-        prediction, probability = classify_item(user_sentence, classifier, vectorizer)
+        prediction, probability = classify_item(user_sentence, classifier, vectorizer, spacy_model=spacy_model, snowball_stemmer=snowball_stemmer)
         results.append([user_sentence, prediction, probability])
         print(f"Prediction: {prediction}, Probability: {probability}")
         user_input = input("\n Classify another sentence? (Y/n)")
@@ -114,9 +163,12 @@ def classify_txt():
     with open(user_input, encoding="utf-8") as corpus:
         items = corpus.readlines()
 
+    spacy_model = ask_spacy()
+    snowball_stemmer = ask_snowball()
+
     results = []
     for item in items:
-        prediction, probability = classify_item(item, classifier, vectorizer)
+        prediction, probability = classify_item(item, classifier, vectorizer, spacy_model=spacy_model, snowball_stemmer=snowball_stemmer)
         results.append([item, prediction, probability])
     print_results(results)
 

@@ -5,7 +5,7 @@ import re
 #from nltk.stem.snowball import GermanStemmer
 #german=GermanStemmer()
 
-def preprocess_sentence(sentence):
+def preprocess_sentence(sentence, spacy_model=False, snowball_stemmer=False):
     '''
     define all steps that we want to change on the used texts (train and input test) here in this method.
     '''
