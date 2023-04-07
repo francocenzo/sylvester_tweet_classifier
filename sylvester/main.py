@@ -2,88 +2,71 @@
 import time
 from datetime import datetime
 
-import spacy
-from nltk.stem.snowball import SnowballStemmer
-
 from sylvester.analyzer import analyze
 from sylvester.data import load_training, find_training_file
 from sylvester.classify import classify_item
+from sylvester.menu import ask_snowball, ask_spacy, ask_save_feature, ask_save_trainings, ask_run_number, \
+    ask_use_stopwords, ask_corpus_path
 from sylvester.training import train_on_corpus
 from pathlib import Path
+import csv
 
 loaded_spacy_model = None
 loaded_snowball_stemmer = None
-# load_model = spacy.load('de', disable=['parser', 'ner'])
-
-
-def ask_snowball():
-    """
-    blueprint
-    """
-    global loaded_snowball_stemmer
-    snowball_stemmer = input("Use Snowball Stemmer? (Y/n)")
-    if snowball_stemmer.lower() != "n":
-        snowball_stemmer = True
-    else:
-        snowball_stemmer = False
-
-    if snowball_stemmer:
-        if not loaded_snowball_stemmer:
-            snowball_stemmer = SnowballStemmer("german")
-            loaded_snowball_stemmer = snowball_stemmer
-        else:
-            snowball_stemmer = loaded_snowball_stemmer
-    return snowball_stemmer
-
-
-def ask_spacy():
-    global loaded_spacy_model
-    spacy_model = input("Use Spacy Lemmatizer? (Y/n)")
-    if spacy_model.lower() != "n":
-        spacy_model = True
-    else:
-        spacy_model = False
-
-    if spacy_model:
-        if not loaded_spacy_model:
-            spacy_model = spacy.load('de_core_news_sm', disable=['parser', 'ner'])
-            loaded_spacy_model = spacy_model
-        else:
-            spacy_model = loaded_spacy_model
-    return spacy_model
+default_corpus = r"../data/Tweets_list2_1-1120.csv"
 
 
 def train_corpus():
-    corpus = input("Full path to corpus: ")
+    global loaded_spacy_model
+    global loaded_snowball_stemmer
 
+    corpus = ask_corpus_path()
     if len(corpus) == 0:
-        corpus = "../data/Tweets_1-1200.csv"
+        corpus = default_corpus
+    runs = ask_run_number()
 
-    runs = input("How man times: ")
-    try:
-        runs = int(runs)
-    except:
-        runs = 1
+    save = ask_save_trainings()
+    save_feature = ask_save_feature()
+    spacy_model = ask_spacy(loaded_spacy_model)
+    snowball_stemmer = ask_snowball(loaded_snowball_stemmer)
+    use_stowords = ask_use_stopwords()
 
-    save = input("Save trainings? (Y/n)")
-    if save.lower() != "n":
-        save = True
-    else:
-        save = False
+    results = run_training(corpus, runs, save, save_feature, snowball_stemmer, spacy_model, use_stopwords=use_stowords, ngram_range=[1, 1], test_size=0.25, rows=500)
 
-    save_feature = input("Save features? (Y/n)")
-    if save_feature.lower() != "n":
-        save_feature = True
-    else:
-        save_feature = False
+    print(f"\nTraining complete. Saved:")
+    for idx, item in enumerate(results):
+        print(f'Training run {idx + 1}: {item["file_name"]}')
 
-    spacy_model = ask_spacy()
-    snowball_stemmer = ask_snowball()
+    avg_accuracy = sum(item["accuracy"] for item in results) / runs
+    avg_precision_mk = sum(item["precision_mk"] for item in results) / runs
+    avg_recall = sum(item["recall"] for item in results) / runs
+    avg_f1 = sum(item["f1"] for item in results) / runs
+
+    print(f"\nAverages of {runs} runs:")
+    print(f"avg accuracy: {avg_accuracy}")
+    print(f"avg precision_mk: {avg_precision_mk}")
+    print(f"avg recall: {avg_recall}")
+    print(f"avg f1: {avg_f1}")
+
+
+def run_training(corpus, runs, save, save_feature, snowball_stemmer, spacy_model, use_stopwords=False, ngram_range=None, test_size=None, rows=None):
 
     results = []
     for run in range(runs):
         time.sleep(1)
-        classifier, vectorizer, label_predicted, label_test, accuracy, precision_mk, recall, f1, timestamp, file_name = train_on_corpus(corpus, save=save, save_feature=save_feature, spacy_model=spacy_model, snowball_stemmer=snowball_stemmer)
+        classifier, vectorizer, label_predicted, label_test, accuracy, \
+            precision_mk, recall, f1, timestamp, file_name = train_on_corpus(
+            corpus,
+            save=save,
+            save_feature=save_feature,
+            spacy_model=spacy_model,
+            snowball_stemmer=snowball_stemmer,
+            use_stopwords=use_stopwords,
+            ngram_range=ngram_range,
+            test_size=test_size,
+            rows=rows
+        )
+
         results.append({
             "classifier": classifier,
             "vectorizer": vectorizer,
@@ -96,21 +79,7 @@ def train_corpus():
             "timestamp": timestamp,
             "file_name": file_name
         })
-
-    print(f"\nTraining complete. Saved:")
-    for idx, item in enumerate(results):
-        print(f'Training run {idx + 1}: {item["file_name"]}')
-
-
-    avg_accuracy = sum(item["accuracy"] for item in results) / runs
-    avg_precision_mk = sum(item["precision_mk"] for item in results) / runs
-    avg_recall = sum(item["recall"] for item in results) / runs
-    avg_f1 = sum(item["f1"] for item in results) / runs
-    print(f"\nAverages of {runs} runs:")
-    print(f"avg accuracy: {avg_accuracy}")
-    print(f"avg precision_mk: {avg_precision_mk}")
-    print(f"avg recall: {avg_recall}")
-    print(f"avg f1: {avg_f1}")
+    return results
 
 
 def analyze_training():
@@ -134,8 +103,6 @@ def print_results(results):
         if save_output.lower() == "y":
             with open(output_file, "a+", encoding="utf8") as open_file:
                 open_file.write(output_string)
-
-
 
 
 def classify_user_input():
@@ -178,7 +145,8 @@ def run():
         ["Train Corpus", train_corpus],
         ["Analyze Training", analyze_training],
         ["Classify0 input", classify_user_input],
-        ["Classify TXT-File", classify_txt]
+        ["Classify TXT-File", classify_txt],
+        ["Bulk Analyze"]
     ]
 
     for idx, item in enumerate(options):
@@ -189,7 +157,94 @@ def run():
     task()
 
 
+def bulk_run():
+    global loaded_spacy_model
+    global loaded_snowball_stemmer
+
+    corpus = ask_corpus_path()
+    if len(corpus) == 0:
+        corpus = default_corpus
+
+    runs = ask_run_number()
+    save = ask_save_trainings()
+    save_feature = ask_save_feature()
+    spacy_model = ask_spacy(loaded_spacy_model)
+
+    snowball_stemmer = False
+    if not spacy_model:
+        snowball_stemmer = ask_snowball(loaded_snowball_stemmer)
+
+    print("Starting\n")
+
+    stopword_variations = [False, True]
+    test_size_variations = [0.1, 0.2, 0.25, 0.3]
+    test_size_variations = [0.1]
+    ngram_variations = [(1, 1), (1, 2), (2, 2), (1, 3), (2, 3), (3, 3)]
+    ngram_variations = [(1, 1)]
+    rows_variations = list(range(50, 550, 50))
+    rows_variations = [100, 200, 300]
+
+    run_datetime = str(datetime.now()).replace(":", "-").replace(" ", "_").split(".")[0]
+    header = ["run_timestamp", "corpus", "use_stopwords", "test_size", "ngram", "rows", "runs", "stem_lemma", "avg_accuracy", "avg_precision_mk", "avg_recall", "avg_f1"]
+    csv_output = []
+    csv_output.append(header)
+
+    if spacy_model:
+        stem_lem = "Spacy Lemmatizer"
+    elif snowball_stemmer:
+        stem_lem = "NLTK Snowball Stemmer"
+    else:
+        stem_lem = "None"
+
+    overall_start = datetime.now()
+    for use_stopwords in stopword_variations:
+        for test_size in test_size_variations:
+            for ngram in ngram_variations:
+                timestamp = str(datetime.now()).replace(":", "-").replace(" ", "_").split(".")[0]
+                print("\n")
+                print(f"Timestamp: {timestamp}")
+                print(f"Stopwords: {use_stopwords}")
+                print(f"Stem or Lem: {stem_lem}")
+                print(f"NGram: {ngram[0]}-{ngram[1]}-gram")
+                print(f"Corpus/Test: {int(100 - (100 * test_size))}/{int(100 * test_size)}")
+
+                for rows in rows_variations:
+
+                    results = run_training(
+                        corpus,
+                        runs,
+                        save,
+                        save_feature,
+                        snowball_stemmer,
+                        spacy_model,
+                        use_stopwords=use_stopwords,
+                        ngram_range=ngram,
+                        test_size=test_size,
+                        rows=rows)
+
+                    avg_accuracy = sum(item["accuracy"] for item in results) / runs
+                    avg_precision_mk = sum(item["precision_mk"] for item in results) / runs
+                    avg_recall = sum(item["recall"] for item in results) / runs
+                    avg_f1 = sum(item["f1"] for item in results) / runs
+
+                    run_output = [
+                        str(run_datetime), str(corpus), str(use_stopwords), str(test_size), str(ngram), str(rows), str(runs),
+                        str(type(stem_lem)), str(avg_accuracy), str(avg_precision_mk), str(avg_recall), str(avg_f1)
+                    ]
+                    csv_output.append(run_output)
+
+                    print(f"{rows}\t{avg_accuracy}\t{avg_precision_mk}\t{avg_recall}\t{avg_f1}")
+
+    file_name = f"Results_{run_datetime}.csv"
+    with open(file_name, "w", encoding="utf8") as fo:
+        csv_writer = csv.writer(fo, delimiter=";", quotechar='"')
+        csv_writer.writerows(csv_output)
+
+    print(f"Finished. Runtime: {datetime.now() - overall_start}")
+
+
 if __name__ == "__main__":
     # training-2022-06-10_19-06-38.pkl
     # ../data/Tweets_1-1200.csv
-    run()
+    # run()
+    bulk_run()

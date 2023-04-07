@@ -47,13 +47,13 @@ def analyze(classifier, vectorizer):
 
 def calculate_metrics(label_predicted, label_test):
     accuracy = metrics.accuracy_score(label_test, label_predicted)
-    print("accuracy:\t", accuracy)
+    ## print("accuracy:\t", accuracy)
     precision_mk = metrics.precision_score(label_test, label_predicted, pos_label='MK')
-    print("precision:\t", precision_mk)
+    ## print("precision:\t", precision_mk)
     recall = metrics.recall_score(label_test, label_predicted, pos_label='MK')
-    print("recall:\t", recall)
+    ## print("recall:\t", recall)
     f1 = metrics.f1_score(label_test, label_predicted, pos_label='MK')
-    print("f1:\t", f1)
+    ## print("f1:\t", f1)
     return accuracy, precision_mk, recall, f1
 
 

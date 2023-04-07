@@ -2,6 +2,7 @@
 /data/
 /debugging/
 /training_sessions/
+Results*.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -2,19 +2,17 @@
 import pickle
 from datetime import datetime
 from pathlib import Path
-
 import pandas as pd
-
 from sylvester.preprocessing import preprocess_sentence
 
 
-def get_data(file_path, spacy_model=False, snowball_stemmer=False):
+def get_data(file_path, spacy_model=False, snowball_stemmer=False, rows=False):
 
     # header = 0 -> zero-based index
-    data_file = pd.read_csv(file_path, header=0, sep=';', nrows=500)
+    data_file = pd.read_csv(file_path, header=0, sep=';', nrows=rows)
     # debug info to show that the data is imported:
-    print(data_file.shape)
-    print(data_file.head())
+    ## print(data_file.shape)
+    ## print(data_file.head())
 
     mk = []
     pendant = []
@@ -26,9 +24,9 @@ def get_data(file_path, spacy_model=False, snowball_stemmer=False):
         mk.append(mk_sentence)
         pendant_sentence = preprocess_sentence(value[1], spacy_model=spacy_model, snowball_stemmer=snowball_stemmer)
         pendant.append(pendant_sentence)
-        if value_counter % 1000:  # modulo is true if / 60 has no rest
-            print("mk: ", mk_sentence)
-            print("pendant: ", pendant_sentence)
+        ## if value_counter % 1000:  # modulo is true if / 60 has no rest
+            ## print("mk: ", mk_sentence)
+            ## print("pendant: ", pendant_sentence)
         value_counter += 1
 
     # combine all data -> mk, mk, mk ... pendant, pendant, pendant

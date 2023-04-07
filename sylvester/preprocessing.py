@@ -1,11 +1,11 @@
 # -*- coding:utf-8 -*-
 import re
-import spacy
+# python -m spacy download de_core_news_sm
 
 import nltk
 #from nltk.stem.snowball import GermanStemmer
-
 #stemmer = GermanStemmer()
+
 
 def spacy_lemma(sentence, load_model):
 
